@@ -1,0 +1,25 @@
+{
+  "name": "source_postgres_northwind",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "plugin.name": "pgoutput",
+    
+    "database.hostname": "host.docker.internal",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.dbname": "northwind",
+    "database.server.name": "pg_northwind",
+    
+    "topic.prefix": "cdc",
+    "table.include.list": "public.orders",
+    
+    "snapshot.mode": "initial",
+    "tombstones.on.delete": "false",
+    
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "true",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "true"
+  }
+}

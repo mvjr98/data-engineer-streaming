@@ -1,0 +1,35 @@
+{
+  "name": "sink_snowflake_orders_v1",
+  "config": {
+    "connector.class": "com.snowflake.kafka.connector.SnowflakeSinkConnector",
+    "tasks.max": "1",
+    "topics": "cdc.public.orders",
+
+    "snowflake.url.name": "<SUA_CONTA>.snowflakecomputing.com",
+    "snowflake.user.name": "SNFLK_USER_KAFKA",
+    "snowflake.role.name": "SNFLK_ROLE_KAFKA",
+    "snowflake.database.name": "RAW_KAFKA",
+    "snowflake.schema.name": "NORTHWIND",
+    
+    "snowflake.private.key": "<COLE_AQUI_SUA_CHAVE_PRIVADA_RSA_KEY_P8_COMPLETA>",
+    "snowflake.private.key.passphrase": "<SENHA_DA_SUA_CHAVE>",
+
+    "snowflake.topic2table.map": "cdc.public.orders:ORDERS_INGEST",
+    "snowflake.ingestion.method": "SNOWPIPE_STREAMING",
+    "snowflake.enable.schematization": "true",
+
+    "buffer.flush.time": "1",
+    "buffer.count.records": "10",
+    "snowflake.streaming.max.client.lag": "1",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "true",
+
+    "transforms": "unwrap",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "rewrite",
+    "transforms.unwrap.add.fields": "op,source.ts_ms"
+  }
+}
