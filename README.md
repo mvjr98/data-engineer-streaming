@@ -10,6 +10,9 @@ Este projeto implementa um pipeline de dados em tempo real utilizando **Change D
       <a href="https://www.docker.com/">
         <img alt="Docker" width="40px" style="padding-right:20px;" src="https://raw.githubusercontent.com/mvjr98/fancy-icons/main/docker/docker.svg"/>
       </a>
+        <a href="https://www.postgresql.org/">
+        <img alt="PostgreSQL" width="40px" style="padding-right:20px;" src="https://raw.githubusercontent.com/mvjr98/fancy-icons/main/postgres/postgres.svg"/>
+      </a>
       <a href="https://kafka.apache.org/">
         <img alt="Kafka" width="40px" style="padding-right:20px;" src="https://raw.githubusercontent.com/mvjr98/fancy-icons/main/apache_kafka/apache_kafka.svg"/>
       </a>
@@ -31,7 +34,6 @@ O fluxo de dados segue a arquitetura abaixo:
 5.  **Transformação (Snowflake Tasks):** Uma *Task* agendada faz o `MERGE` (Deduplicação, Updates e Deletes) da tabela de ingestão (Raw) para a tabela final (Bronze).
 
 ![Architecture Diagram](./architecture_diagram.png)
-*(Certifique-se de colocar a imagem que você gerou nesta pasta)*
 
 ---
 
@@ -44,24 +46,22 @@ O fluxo de dados segue a arquitetura abaixo:
 │
 ├── kafka/                  # Core de Streaming
 │   ├── docker-compose.yml  # Zookeeper, Broker, Schema Registry, Connect, AKHQ
-│   ├── kafka-connect/      # Plugins (Jars do Debezium e Snowflake)
 │   └── connectors-config/  # JSONs de configuração dos conectores
 │
 ├── Snowflake/              # Scripts e Configurações do Destino
-│   └── setup_pipeline.sql  # SQL para criar DB, Schema, Tables, Streams e Tasks
+│   └── setup_pipeline.md  # SQL para criar DB, Schema, Tables, Streams e Tasks
 │
 ├── setup_connectors.sh     # Script para automatizar o deploy dos conectores
 └── README.md               # Documentação do Projeto
 ```
 ##
 ### 🛠️ Pré-requisitos
-- Docker & Docker Compose instalados.
+- Docker e Docker Compose instalados.
 
 - [Conta no Snowflake](https://signup.snowflake.com/?trial=student) (Trial ou Enterprise).
 
 - Chaves RSA geradas para autenticação segura no Snowflake.
 
-- jq e curl (opcionais, para rodar o script de automação localmente).
 ##
 
 ### Como Executar
@@ -128,17 +128,3 @@ Nunca commite o arquivo da chave privada (rsa_key.p8) no Git.
 Utilize o .gitignore para excluir arquivos de chaves e configurações sensíveis.
 
 Em produção, recomenda-se o uso de Secrets Management ou variáveis de ambiente para injetar a chave privada (SNOWFLAKE_PRIVATE_KEY) no container.
-
-Autor: Mauro
-
-
-INSERT INTO public.orders VALUES
-	(11555, 'VINET', 5, '1996-07-04', '1996-08-01', '1996-07-16', 3, 32.38, 'Vins et alcools Chevalier', '59 rue de l''Abbaye', 'Reims', NULL, '51100', 'France')
-
-
-UPDATE public.orders SET ship_country = 'Brazil'
-WHERE order_id = 11555
-
-
-DELETE FROM public.orders
-WHERE order_id = 11555
