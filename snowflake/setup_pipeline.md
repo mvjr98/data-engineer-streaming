@@ -36,7 +36,7 @@ CREATE USER IF NOT EXISTS SNFLK_USER_KAFKA
 -- 3. Atribuir a Role ao Usuário
 GRANT ROLE SNFLK_ROLE_KAFKA TO USER SNFLK_USER_KAFKA;
 
--- 4. Dar permissão de uso do Warehouse (Necessário para ingerir dados)
+-- 4. Dar permissão de uso do Warehouse
 GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE SNFLK_ROLE_KAFKA;
 
 -- 5: Permitir que administradores gerenciem os objetos dessa role

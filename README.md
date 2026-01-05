@@ -1,27 +1,38 @@
 # 🚀 Real-Time CDC Pipeline: PostgreSQL to Snowflake
 
-Este projeto implementa um pipeline de dados em tempo real utilizando **Change Data Capture (CDC)**. Ele captura transações de um banco operacional PostgreSQL (OLTP), transmite via Kafka e ingere no Snowflake (OLAP) com latência de segundos para análise de dados.
+Este projeto implementa um pipeline de dados **Change Data Capture (CDC)** de alta performance. O objetivo é replicar transações de um banco operacional (OLTP) para um Data Warehouse (OLAP) com latência de segundos, utilizando **Snowpipe Streaming** e uma arquitetura robusta de ingestão e consolidação.
 
 ## Tecnologias Utilizadas
 
-<table align="center">
+<div align="center">
+
+<table>
   <tr>
     <td align="center">
-      <a href="https://www.docker.com/">
-        <img alt="Docker" width="40px" style="padding-right:20px;" src="https://raw.githubusercontent.com/mvjr98/fancy-icons/main/docker/docker.svg"/>
+      <a href="https://www.docker.com/" target="_blank">
+        <img src="https://raw.githubusercontent.com/mvjr98/fancy-icons/main/docker/docker.svg" width="48" alt="Docker"/>
       </a>
-        <a href="https://www.postgresql.org/">
-        <img alt="PostgreSQL" width="40px" style="padding-right:20px;" src="https://raw.githubusercontent.com/mvjr98/fancy-icons/main/postgres/postgres.svg"/>
+    </td>
+    <td align="center">
+      <a href="https://www.postgresql.org/" target="_blank">
+        <img src="https://raw.githubusercontent.com/mvjr98/fancy-icons/main/postgres/postgres.svg" width="48" alt="PostgreSQL"/>
       </a>
-      <a href="https://kafka.apache.org/">
-        <img alt="Kafka" width="40px" style="padding-right:20px;" src="https://raw.githubusercontent.com/mvjr98/fancy-icons/main/apache_kafka/apache_kafka.svg"/>
+    </td>
+    <td align="center">
+      <a href="https://kafka.apache.org/" target="_blank">
+        <img src="https://raw.githubusercontent.com/mvjr98/fancy-icons/main/apache_kafka/apache_kafka.svg" width="48" alt="Kafka"/>
       </a>
-      <a href="https://www.snowflake.com/pt_br/">
-        <img alt="Snowflake" width="40px" style="padding-right:20px;" src="https://raw.githubusercontent.com/MvJr98/fancy-icons/main/snowflake/snowflake.svg"/>
+    </td>
+    <td align="center">
+      <a href="https://www.snowflake.com/pt_br/" target="_blank">
+        <img src="https://raw.githubusercontent.com/MvJr98/fancy-icons/main/snowflake/snowflake.svg" width="48" alt="Snowflake"/>
       </a>
     </td>
   </tr>
 </table>
+
+</div>
+
 
 ## 🏛️ Arquitetura
 
@@ -34,6 +45,21 @@ O fluxo de dados segue a arquitetura abaixo:
 5.  **Transformação (Snowflake Tasks):** Uma *Task* agendada faz o `MERGE` (Deduplicação, Updates e Deletes) da tabela de ingestão (Raw) para a tabela final (Bronze).
 
 ![Architecture Diagram](./architecture_diagram.png)
+
+## ⚖️ Decisão de Arquitetura (ADR)
+
+Para a camada de transformação no Snowflake (CDC Merge), existem duas abordagens modernas. Este projeto adota intencionalmente a abordagem **Imperativa (Stream + Task)**.
+
+### 🔹 Escolha Atual: Stream + Task (Imperativo)
+Optou-se por controlar manualmente o ciclo de vida dos dados.
+* **Controle Total:** Permite implementar lógicas complexas de `MERGE` (ex: tratamento de *Deletes* lógicos via SMT rewrite).
+* **Aprendizado:** Excelente para entender a mecânica de deduplicação e ordenação de eventos em sistemas distribuídos.
+* **Custo & Performance:** Eficiência ajustada pelo agendamento da Task (CRON) e tamanho do Warehouse, evitando processamento desnecessário.
+
+### 🔸 Alternativa: Dynamic Tables (Declarativo)
+Reconhecemos que *Dynamic Tables* são uma alternativa viável.
+* **Abordagem:** Define-se apenas o `SELECT` final e o `TARGET_LAG`. O Snowflake gerencia a orquestração.
+* **Trade-off:** Ganha-se facilidade de manutenção ("Set and Forget"), mas perde-se a granularidade de controle sobre como cada linha é processada e tratada em cenários de borda.
 
 ---
 
@@ -121,7 +147,7 @@ chmod +x setup_connectors.sh
 ##
 
 🛡️ Segurança
-Este projeto utiliza Key Pair Authentication para comunicação entre o Kafka Connect e o Snowflake.
+Este projeto utiliza Key Pair Authentication (RSA 2048) para comunicação entre o Kafka Connect e o Snowflake.
 
 Nunca commite o arquivo da chave privada (rsa_key.p8) no Git.
 
