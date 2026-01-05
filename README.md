@@ -46,7 +46,7 @@ O fluxo de dados segue a arquitetura abaixo:
 
 ![Architecture Diagram](./architecture_diagram.png)
 
-## ⚖️ Decisão de Arquitetura (ADR)
+## Decisão de Arquitetura
 
 Para a camada de transformação no Snowflake (CDC Merge), existem duas abordagens modernas. Este projeto adota intencionalmente a abordagem **Imperativa (Stream + Task)**.
 
@@ -122,6 +122,19 @@ Validação: Acesse o AKHQ (Kafka UI) em http://localhost:8080 para monitorar os
 
 ### 4. Deploy dos Conectores (Automação)
 Para configurar os conectores automaticamente, utilize o script ```setup_connectors.sh``` na raiz do projeto.
+
+### ⚠️ Configuração Obrigatória antes do Deploy
+
+Antes de executar o script de deploy, você DEVE editar o arquivo kafka/connectors-config/sink_snowflake.json. Substitua os placeholders abaixo pelas suas credenciais reais geradas no passo de Key Pair:
+
+  - **snowflake.url.name**: Sua URL da conta (ex: xy12345.abc56789).
+
+  - **snowflake.private.key**: O conteúdo COMPLETO do arquivo rsa_key.p8 (Sem quebra de linha).
+
+  - **snowflake.private.key.passphrase**: A senha que você criou ao gerar a chave.
+
+O conector falhará se essas chaves não forem preenchidas corretamente.
+
 
 ```bash
 chmod +x setup_connectors.sh
